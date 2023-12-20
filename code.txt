@@ -1,0 +1,40 @@
+function [x, fval] = newton(f, x0)
+% f: 目标函数
+% x0: 初始点
+% x: 最优解
+% fval: 最优值
+
+syms x1 x2
+vars = [x1; x2];
+gradf = matlabFunction(gradient(f(vars), vars));
+hessf = matlabFunction(hessian(f(vars), vars));
+
+tol = 1e-6; % 容差
+maxiter = 1000; % 最大迭代次数
+
+x = x0;
+X = x; % 记录迭代点
+for i = 1:maxiter
+    g = gradf(x(1), x(2));
+    H = hessf(x(1), x(2));
+    d = -H\g;
+    x = x + d;
+    X = [X, x]; % 记录迭代点
+    if norm(g) < tol
+        break;
+    end
+end
+
+fval = f(x);
+
+% 绘制目标函数的等高线和迭代路径
+x1_range = linspace(min(X(1,:))-1, max(X(1,:))+1, 100);
+x2_range = linspace(min(X(2,:))-1, max(X(2,:))+1, 100);
+[X1, X2] = meshgrid(x1_range, x2_range);
+F = f([X1(:)'; X2(:)']);
+F = reshape(F, size(X1));
+contour(X1, X2, F);
+hold on;
+plot(X(1,:), X(2,:), 'r-o');
+hold off;
+end
